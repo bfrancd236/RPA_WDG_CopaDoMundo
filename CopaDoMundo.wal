@@ -1,0 +1,20 @@
+�	defVar --name bwCopa --type Browser
+defVar --name dt --type DataTable
+defVar --name nuLoopGrupo --type Numeric
+defVar --name nuLoopTime --type Numeric
+defVar --name txPosicao --type String
+defVar --name txTime --type String
+defVar --name txGrupo --type String
+webStart --name copa --type "Chrome" bwCopa=value
+webNavigate --url "https://ge.globo.com/futebol/copa-do-mundo/2022/"
+webGetTable --removehtml  --selector "XPath" --xpath "/html/body/div[2]/main/div[2]/div/section/article[7]/section[1]/div/table[1]" --simulatehuman  dt=value
+for --variable ${nuLoopTime} --from 1 --to 4 --step 1
+	mapTableRow --dataTable ${dt} --row ${nuLoopTime} --mappings "number=1=${txPosicao},number=2=${txTime}"
+	if --left "${txTime}" --operator "Contains" --right Brasil
+		setVar --name "${txGrupo}" --value "Posição: ${txPosicao} | Time: ${txTime}"
+		break
+	endIf
+next
+runWindowsScript --scripttype "BATScript" --source "Text" --script "curl -H \"Title: COPA RPA Community\" -H \"Tags: soccer\" -d \"O brasil esta na posicao: ${txPosicao}\" -H \"Click: https://ge.globo.com/futebol/copa-do-mundo/2022/\" ntfy.sh/testedenotificacao"
+logMessage --message Teste --type "Info"
+webClose --name copa --leavebrowseropen *21.0.6.0
